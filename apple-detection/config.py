@@ -18,11 +18,17 @@ IMGSZ = 640
 BATCH = 16
 SEED = 0                           # 固定随机种子，保证可复现
 DEVICE = 0                         # GPU 编号；CPU 用 "cpu"
-WORKERS = 8
+WORKERS = 16                       # 128核CPU，dataloader多给一些
+
+# ---- 训练加速/稳定（对 baseline 和魔改版一致，不破坏公平对比）----
+CACHE = "ram"                      # 数据集小，全缓存进内存，消除IO瓶颈（内存充足）
+AMP = True                         # 自动混合精度，4090 TensorCore 提速省显存
+PATIENCE = 50                      # 早停：50轮无提升则停，省时间不影响最终精度
 
 # ---- 评估 / 测速 ----
 CONF = 0.001                       # 评估用低置信度阈值（算 mAP 标准做法）
 IOU_NMS = 0.7
+MAX_DETS = 300                     # 每图最大检测数（对齐对比表 maxDets 列；密集场景可调 500）
 FPS_WARMUP = 20                    # 测 FPS 前的预热次数
 FPS_RUNS = 100                     # 测 FPS 的正式次数
 

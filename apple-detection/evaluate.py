@@ -42,23 +42,50 @@ def measure_fps(weights: str):
     return round(dt * 1000, 2), round(1.0 / dt, 1)   # (Lat ms, FPS)
 
 
-def evaluate(weights: str, name: str = "model", split: str = "test") -> dict:
-    """跑一个模型，返回一行指标 dict。"""
+def _area_aps(m) -> tuple:
+    """从 val 结果里取小/中/大目标 AP（APs/APm/APl，COCO 面积分档）。
+    Ultralytics 未跑 COCO 面积评估时这三档不可得，返回 None，表格里显示为 '-'。"""
+    try:
+        # Ultralytics 在 box 上暴露 COCO 风格面积指标时才有值
+        aps = getattr(m.box, "aps", None)
+        apm = getattr(m.box, "apm", None)
+        apl = getattr(m.box, "apl", None)
+        if aps is not None and apm is not None and apl is not None:
+            return round(float(aps), 4), round(float(apm), 4), round(float(apl), 4)
+    except Exception:
+        pass
+    return None, None, None
+
+
+def evaluate(weights: str, name: str = "model", split: str = "test",
+             data: str = None, imgsz: int = None) -> dict:
+    """跑一个模型，返回一行指标 dict。
+
+    data / imgsz 可覆盖 config 默认值 —— eval_by_weather.py 用它逐天气切换数据。
+    """
+    data = data or C.DATA_YAML
+    imgsz = imgsz or C.IMGSZ
     model = YOLO(weights)
     m = model.val(
-        data=C.DATA_YAML, imgsz=C.IMGSZ, batch=C.BATCH,
+        data=data, imgsz=imgsz, batch=C.BATCH,
         conf=C.CONF, iou=C.IOU_NMS, device=C.DEVICE,
         split=split, verbose=False,
     )
     b = m.box
     params = count_params(model)
     lat, fps = measure_fps(weights)
+    aps, apm, apl = _area_aps(m)
     row = {
         "model": name,
+        "imgsz": imgsz,
+        "maxDets": C.MAX_DETS,
         "Params(M)": params,
         "mAP50":    round(float(b.map50), 4),
         "mAP50-95": round(float(b.map),   4),   # 主指标 AP
         "mAP75":    round(float(b.map75), 4),
+        "APs":      "-" if aps is None else aps,
+        "APm":      "-" if apm is None else apm,
+        "APl":      "-" if apl is None else apl,
         "precision": round(float(b.mp),   4),
         "recall":    round(float(b.mr),   4),
         "Lat(ms)":  lat,

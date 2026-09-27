@@ -29,6 +29,9 @@ def main():
         deterministic=True,        # 尽量可复现
         device=C.DEVICE,
         workers=C.WORKERS,
+        cache=C.CACHE,             # RAM 缓存数据，消除 IO 瓶颈
+        amp=C.AMP,                 # 混合精度，4090 提速省显存
+        patience=C.PATIENCE,       # 早停
         project=C.RUNS_DIR,
         name="baseline",
         exist_ok=True,

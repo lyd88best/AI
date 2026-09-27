@@ -25,7 +25,8 @@ MODELS = [
 ]
 # ================================================
 
-COLS = ["model", "Params(M)", "mAP50", "mAP50-95", "mAP75",
+COLS = ["model", "imgsz", "maxDets", "Params(M)",
+        "mAP50-95", "mAP50", "mAP75", "APs", "APm", "APl",
         "precision", "recall", "Lat(ms)", "FPS"]
 
 
