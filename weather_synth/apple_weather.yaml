@@ -1,0 +1,16 @@
+# =====================================================================
+# 数据集定义 (Ultralytics YOLO) —— 混合天气训练集（离线方式B）
+# 仅 train 指向混合天气集 train_weather；val/test 与 apple.yaml 完全一致，
+# 保证评估口径不变、无数据泄漏（test 天气在 weather3，来自 test_clean，不重叠）。
+#
+# 用途：训练"baseline+天气训练"对照组 和 你的增强模型，与只用 apple.yaml
+# 训练的 baseline 做公平对比（唯一变量=是否见过恶劣天气训练数据/是否有模块）。
+# =====================================================================
+path: /root/autodl-tmp/apple-detection/dataset_split
+
+train: images/train_weather   # 混合天气训练集（469张，每图随机一种天气，方式B）
+val:   images/val             # 验证集（干净，与 baseline 一致）
+test:  images/test            # 测试集（干净，与 baseline 一致）
+
+names:
+  0: apple
